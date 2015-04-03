@@ -43,7 +43,7 @@ This is computed seperately on every component of the latent space.
 
 def main():
     regularization = 'ZBA' # TODO (currently NO regularization)
-    lr = .001
+    lr = .0001
     step_rule = RMSProp(learning_rate=lr, decay_rate=0.95)
     #step_rule = Momentum(learning_rate=lr, momentum=0.9)
     batch_size = 1000
