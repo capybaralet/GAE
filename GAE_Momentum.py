@@ -80,6 +80,8 @@ def main():
     def cdf(x):
         return .5*(1 + T.erf(x / 2**.5))
 
+    empirical_cdf_values = 1./batch_size * T.arange(batch_size)
+
     # Compute cost
     # TODO: go back to matrix version when T.sort grad is fixed!
     if 0:
@@ -88,7 +90,6 @@ def main():
         print "z_shape=", z_np.shape
         z_sorted = T.sort(z)
         prior_cdf_values = cdf(z_sorted)
-        empirical_cdf_values = 1./batch_size * T.arange(batch_size)
         ks_diffs = T.maximum(T.sqrt((prior_cdf_values - empirical_cdf_values)**2),
                              T.sqrt((prior_cdf_values - empirical_cdf_values + 1./batch_size)**2))
         prior_cost = T.sum(T.max(ks_diffs, 1))
@@ -99,10 +100,14 @@ def main():
         print "z_shape=", z_np.shape
         prior_cdf_values = [cdf(T.sort(z[:,i])) for i in range(nlat)]
         #prior_cdf_values = [T.erf(T.sort(z[:,i])) for i in range(nlat)]
-        empirical_cdf_values = 1./batch_size * T.arange(batch_size)
         ks = [T.max(T.maximum(T.sqrt((prior_cdf_values[i] - empirical_cdf_values)**2),
                               T.sqrt((prior_cdf_values[i] - empirical_cdf_values + 1./batch_size)**2)))
                         for i in range(nlat)]
+        #ks_fn = F([x], ks)
+        #ks_np = ks_fn(x.tag.test_value)
+        #print "len(ks_np)", len(ks_np)
+        #print "ks_np[0].shape", ks_np[0].shape
+        #print "ks_np", ks_np
         prior_cost = T.sum(ks)
         prior_cost.name = 'prior_cost'
     reconstruction_cost = ((x - x_hat)**2).mean() * nvis
