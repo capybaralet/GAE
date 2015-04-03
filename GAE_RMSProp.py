@@ -78,8 +78,7 @@ def main():
 
 
     # Compute cost
-    # TODO: go back to matrix version when T.sort grad is fixed!
-    if 0:
+    if 0: # TODO: go back to matrix version when T.sort grad is fixed!
         z_fn = F([x], z)
         z_np = z_fn(x.tag.test_value)
         print "z_shape=", z_np.shape

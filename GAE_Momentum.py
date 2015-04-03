@@ -43,7 +43,7 @@ This is computed seperately on every component of the latent space.
 
 def main():
     regularization = 'ZBA' # TODO (currently NO regularization)
-    lr = .001
+    lr = .0001
     step_rule = RMSProp(learning_rate=lr, decay_rate=0.95)
     step_rule = Momentum(learning_rate=lr, momentum=0.9)
     batch_size = 1000
@@ -77,6 +77,9 @@ def main():
     x_hat.name = 'x_hat'
 
 
+    def cdf(x):
+        .5*(1 + T.erf(x / 2**.5))
+
     # Compute cost
     # TODO: go back to matrix version when T.sort grad is fixed!
     if 0:
@@ -84,7 +87,7 @@ def main():
         z_np = z_fn(x.tag.test_value)
         print "z_shape=", z_np.shape
         z_sorted = T.sort(z)
-        prior_cdf_values = T.erf(z_sorted)
+        prior_cdf_values = cdf(z_sorted)
         empirical_cdf_values = 1./batch_size * T.arange(batch_size)
         ks_diffs = T.maximum(T.sqrt((prior_cdf_values - empirical_cdf_values)**2),
                              T.sqrt((prior_cdf_values - empirical_cdf_values + 1./batch_size)**2))
@@ -94,7 +97,7 @@ def main():
         z_fn = F([x], z)
         z_np = z_fn(x.tag.test_value)
         print "z_shape=", z_np.shape
-        prior_cdf_values = [T.erf(T.sort(z[:,i])) for i in range(nlat)]
+        prior_cdf_values = [cdf(T.sort(z[:,i])) for i in range(nlat)]
         empirical_cdf_values = 1./batch_size * T.arange(batch_size)
         ks = [T.max(T.maximum(T.sqrt((prior_cdf_values[i] - empirical_cdf_values)**2),
                               T.sqrt((prior_cdf_values[i] - empirical_cdf_values + 1./batch_size)**2)))
