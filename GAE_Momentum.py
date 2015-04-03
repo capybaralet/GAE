@@ -100,8 +100,8 @@ def main():
         print "z_shape=", z_np.shape
         prior_cdf_values = [cdf(T.sort(z[:,i])) for i in range(nlat)]
         #prior_cdf_values = [T.erf(T.sort(z[:,i])) for i in range(nlat)]
-        ks = [T.max(T.maximum(T.sqrt((prior_cdf_values[i] - empirical_cdf_values)**2),
-                              T.sqrt((prior_cdf_values[i] - empirical_cdf_values + 1./batch_size)**2)))
+        ks = [T.max(T.maximum(T.abs_(prior_cdf_values[i] - empirical_cdf_values),
+                              T.abs_(prior_cdf_values[i] - empirical_cdf_values + 1./batch_size)))
                         for i in range(nlat)]
         #ks_fn = F([x], ks)
         #ks_np = ks_fn(x.tag.test_value)
