@@ -78,7 +78,7 @@ def main():
 
 
     def cdf(x):
-        .5*(1 + T.erf(x / 2**.5))
+        return .5*(1 + T.erf(x / 2**.5))
 
     # Compute cost
     # TODO: go back to matrix version when T.sort grad is fixed!
@@ -98,6 +98,7 @@ def main():
         z_np = z_fn(x.tag.test_value)
         print "z_shape=", z_np.shape
         prior_cdf_values = [cdf(T.sort(z[:,i])) for i in range(nlat)]
+        #prior_cdf_values = [T.erf(T.sort(z[:,i])) for i in range(nlat)]
         empirical_cdf_values = 1./batch_size * T.arange(batch_size)
         ks = [T.max(T.maximum(T.sqrt((prior_cdf_values[i] - empirical_cdf_values)**2),
                               T.sqrt((prior_cdf_values[i] - empirical_cdf_values + 1./batch_size)**2)))
