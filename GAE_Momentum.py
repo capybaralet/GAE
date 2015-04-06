@@ -7,7 +7,8 @@ from blocks.bricks.parallel import Fork
 from fuel.datasets.mnist import MNIST
 from blocks.datasets.streams import DataStream
 from blocks.datasets.schemes import SequentialScheme
-from blocks.extensions import FinishAfter, Timing, Printing
+from blocks.extensions import FinishAfter, Timing, Printing, DumpAlgorithmParams
+from blocks.extensions.saveload import Checkpoint, Dump
 from blocks.extensions.monitoring import DataStreamMonitoring
 from blocks.filter import VariableFilter
 from blocks.graph import ComputationGraph
@@ -18,6 +19,8 @@ from blocks.utils import shared_floatx
 from theano import tensor
 from theano.sandbox.rng_mrg import MRG_RandomStreams
 
+
+#from blocks import * # TODO
 
 from utils import *
 
@@ -41,9 +44,20 @@ This is computed seperately on every component of the latent space.
 # TODO: add regularization (e.g. denoising or ZBA)
 
 
-def main():
+try: filename = os.path.basename(__file__)[:-3] # this script's name (minus '.py')
+except: pass
+subdir = 'GAE/'
+path = '/Tmp/kruegerd/' + subdir
+fs_path = '/data/lisatmp/kruegerd/' + subdir
+if not os.path.exists(path): os.makedirs(path)
+if not os.path.exists(fs_path): os.makedirs(fs_path)
+log_me(subdir+filename)
+
+
+#def main():
+if 1:
     regularization = 'ZBA' # TODO (currently NO regularization)
-    lr = .0001
+    lr = .001
     step_rule = RMSProp(learning_rate=lr, decay_rate=0.95)
     step_rule = Momentum(learning_rate=lr, momentum=0.9)
     batch_size = 1000
@@ -115,6 +129,12 @@ def main():
     cost = (reconstruction_cost + prior_cost).mean()
     cost.name = 'cost'
 
+    nsamples = 49
+    seed = np.random.randn(nsamples, 144).astype("float32")
+    samples_fn = F([z], x_hat)
+    samples_np = samples_fn(seed)
+
+
     # Datasets and data streams
     binary = False
     mnist_train = MNIST(
@@ -153,10 +173,12 @@ def main():
                 monitored_quantities, valid_monitor_stream, prefix="valid"),
             DataStreamMonitoring(
                 monitored_quantities, test_monitor_stream, prefix="test"),
-            Printing()])
+            Printing(),
+            #Checkpoint('GAE_Momentum.pkl'),
+            DumpAlgorithmParams(save_path=path + filename, every_n_epochs=10)])
     main_loop.run()
 
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    main()
+#if __name__ == "__main__":
+#    logging.basicConfig(level=logging.INFO)
+#    main()

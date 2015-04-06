@@ -45,8 +45,13 @@ from pylab import *
 # causes problems when you specify the GPU# now...
 import theano
 import theano.tensor as T
+from theano import shared as ts
 from theano import function as F
-from theano.tensor.shared_randomstreams import RandomStreams
+from theano.tensor.shared_randomstreams import RandomStreams as RS
+trng = RS(123)
+
+
+from dk_reconstruct import vocoder_synth
 
 # import theano.printing.debugprint as print_graph
 
@@ -136,9 +141,9 @@ def fplot(xx):
     plt.figure()
     plt.plot(xx)
 
-def mplots(list_of_vecs, maxnplots=25, background_vecs=None):
+def mplots(list_of_vecs, maxnrows=10, background_vecs=None):
     plt.figure()
-    nrows = min(int(len(list_of_vecs) ** .5), maxnplots)
+    nrows = min(int(len(list_of_vecs) ** .5), maxnrows)
     print "nrows=", nrows
     for i in range(nrows**2):
         plt.subplot(nrows, nrows, i+1)
@@ -147,10 +152,33 @@ def mplots(list_of_vecs, maxnplots=25, background_vecs=None):
             for vec in background_vecs:
                 plt.plot(vec)
 
+def mimshows(list_of_mats, maxnrows=10, normalize=True):
+    plt.figure()
+    nrows = min(int(len(list_of_mats) ** .5), maxnrows)
+    print "nrows=", nrows
+    if normalize:
+        vmin = np.min(list_of_mats)
+        vmax = np.max(list_of_mats)
+    for i in range(nrows**2):
+        plt.subplot(nrows, nrows, i+1)
+        plt.imshow(list_of_mats[i], interpolation='none', cmap="Greys", vmin=vmin, vmax=vmax)
 
 
 #_______________________________________________________________________________
 # OTHER CODE (MINE!)
+
+def nprint(obj):
+    print '\n \n'
+    print obj
+    print '\n \n'
+
+# FIXME (use frames???)
+def dprint(str):
+    print str,"=", locals()[str]
+
+
+def rlen(x):
+    return range(len(x))
 
 def segment_ddm(dmat, length, overlap=0):
     """Segment a design matrix dataset into shorter examples"""
@@ -180,10 +208,6 @@ def replace_slice(arr, replacement_arr, frame_len, subframe_len, start_ind=0):
     tmp[start_ind:start_ind + subframe_len] = replacement_tmp
     return tmp.transpose(range(ndims+1)[::-1]).reshape(arr.shape[:-1] + (-1,))
 
-def nprint(str):
-    print '\n \n'
-    print str
-    print '\n \n'
 
 def try_save(path, arr):
     try:
@@ -262,10 +286,6 @@ def trim(list):
     for i in list:
         mylist.append(i[:minlen])
     return mylist
-
-
-def rlen(x):
-    return range(len(x))
 
 
 
