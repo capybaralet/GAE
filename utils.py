@@ -180,6 +180,17 @@ def dprint(str):
 def rlen(x):
     return range(len(x))
 
+
+def log_p_x_beta(x, a, b):
+    return np.log( x**(a-1) * (1-x)**(b-1) / scipy.special.beta(a,b) )
+
+def theano_beta_fn(a, b):
+    return T.gamma(a) * T.gamma(b) / T.gamma(a+b)
+
+def theano_log_p_x_beta(x, a, b):
+    return T.log( x**(a-1) * (1-x)**(b-1) / theano_beta_fn(a,b) )
+
+
 def segment_ddm(dmat, length, overlap=0):
     """Segment a design matrix dataset into shorter examples"""
     return np.vstack(segment_axis(dmat, length, overlap, 1))
